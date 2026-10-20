@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ ta.name }} - Bio</title>
+</head>
+<body>
+    <h1>About {{ ta.name }}</h1>
+    <h3>Target Grades: {{ ta.grades }}</h3>
+    <p>{{ ta.bio }}</p>
+    <hr>
+    <a href="{% url 'ta_dashboard' %}">Back to Dashboard</a>
+</body>
+</html>
