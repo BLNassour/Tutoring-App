@@ -87,7 +87,8 @@ def delete_availability(request, pk):
 def delete_ta(request, pk):
     if request.user.is_superuser:
         ta = get_object_or_404(TA, pk=pk)
-        ta.delete()
+        if ta.user and not ta.user.is_superuser:
+            ta.user.delete()
     return redirect('ta_dashboard')
 
 class SignUpView(CreateView):
