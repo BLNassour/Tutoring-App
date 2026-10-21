@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import TA, Availability
 from .forms import AvailabilityForm, TACreationForm, SignupForm
+from django.contrib import messages
 
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -47,10 +48,14 @@ def ta_detail(request, pk):
 @login_required
 def edit_availability(request):
     is_master = request.user.is_superuser
-    has_profile = hasattr(request.user, 'ta')
+    ta = getattr(request.user, 'ta', None)
     
-    if not is_master and not has_profile:
-        return redirect('ta_dashboard')
+    #if not is_master:
+    #   messages.error(request, "You don't have a TA profile.")
+    #    return redirect('ta_dashboard')
+
+    ta_form = TACreationForm() if is_master else None
+    slot_form = AvailabilityForm(user=request.user, initial={'ta': ta} if ta else None)
 
     if request.method == 'POST':
         if 'create_ta' in request.POST and is_master:
@@ -63,12 +68,6 @@ def edit_availability(request):
             if slot_form.is_valid():
                 slot_form.save()
                 return redirect('ta_dashboard')
-            
-    ta_form = TACreationForm() if is_master else None
-    slot_form = AvailabilityForm(user=request.user)
-    
-    if not is_master and has_profile:
-        slot_form.fields['ta'].initial = request.user.ta
 
     context = {
         'ta_form': ta_form,

@@ -21,4 +21,3 @@ class SignupForm(forms.ModelForm):
             'grade',
             'subject',
         ]
-
