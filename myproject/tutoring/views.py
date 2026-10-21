@@ -1,7 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import TA, Availability
-from .forms import AvailabilityForm, TACreationForm
+from .forms import AvailabilityForm, TACreationForm, SignupForm
+
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
 
 def ta_dashboard(request):
     selected_grade = request.GET.get('grade', '')
@@ -87,3 +90,8 @@ def delete_ta(request, pk):
         ta = get_object_or_404(TA, pk=pk)
         ta.delete()
     return redirect('ta_dashboard')
+
+class SignUpView(CreateView):
+    form_class = SignupForm
+    success_url = reverse_lazy("login")
+    template_name = "registration/signup.html"

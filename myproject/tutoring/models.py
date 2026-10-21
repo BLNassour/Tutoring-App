@@ -24,3 +24,9 @@ class Availability(models.Model):
 
     def __str__(self):
         return f"{self.ta.name} - {self.day}: {self.time_slot}"
+
+class Signup(models.Model):
+    fields = (
+        'username',
+        'email',
+    )

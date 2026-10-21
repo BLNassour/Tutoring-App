@@ -1,5 +1,6 @@
 from django import forms
-from .models import Availability, TA
+from .models import Availability, TA, User
+from django.contrib.auth.forms import UserCreationForm
 
 class TACreationForm(forms.ModelForm):
     class Meta:
@@ -20,3 +21,11 @@ class AvailabilityForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user and not user.is_superuser:
             self.fields['ta'].queryset = TA.objects.filter(user=user)
+
+class SignupForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "email",
+        )
