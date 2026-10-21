@@ -23,9 +23,18 @@ class AvailabilityForm(forms.ModelForm):
             self.fields['ta'].queryset = TA.objects.filter(user=user)
 
 class SignupForm(UserCreationForm):
+    grade_choices = [
+        ('', ''),
+        ('9th', '9th'),
+        ('10th', '10th'),
+        ('11th', '11th'),
+        ('12th', '12th'),
+    ]
+    grade = forms.ChoiceField(choices=grade_choices, required=True, label="Grade")
     class Meta:
         model = User
         fields = (
             "username",
             "email",
+            "grade",
         )

@@ -29,4 +29,5 @@ class Signup(models.Model):
     fields = (
         'username',
         'email',
+        'grade',
     )
