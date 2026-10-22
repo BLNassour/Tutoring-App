@@ -1,9 +1,30 @@
-{% block title %}Sign Up{% endblock title %}
-
-{% block content %}
-<h2>Sign Up</h2>
+<html>
+<head>
+    <title>TA SignUp</title>
+</head>
+<body>
+<h2>Tutoring Portal Sign Up</h2>
 <form method="post" action="{% url 'signup' %}">
-    {% csrf_token %} {{ form }}
-<button class="btn btn-success" type="submit">Sign Up</button>
+    {% csrf_token %}
+    <table>
+        {% for field in form %}
+            <tr>
+                <td>{{ field.label_tag }}</td>
+                <td>{{ field }}</td>
+            </tr>
+            {% if field.help_text %}
+                <tr>
+                    <td></td>
+                    <td>
+                        <small>{{ field.help_text }}</small>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+<button type="submit">Sign Up</button>
+<hr>
+<a href="{% url 'ta_dashboard' %}">Return to Dashboard</a>
 </form>
-{% endblock content %}
+</body>
+</html>
