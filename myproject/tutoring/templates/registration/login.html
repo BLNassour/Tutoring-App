@@ -1,30 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>TA Sign In</title>
-</head>
-<body>
-    <h2>Tutoring Portal Sign In</h2>
-    
-    {% if form.errors %}
-        <p style="color: red;">Your username and password did not match. Please try again.</p>
-    {% endif %}
+{% extends "base.html" %} {% load crispy_forms_tags %} {% block title %}TA Sign
+In{% endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="mb-3">TA Sign In</h2>
 
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <p>
-            <label for="id_username">Username:</label>
-            {{ form.username }}
-        </p>
-        <p>
-            <label for="id_password">Password:</label>
-            {{ form.password }}
-        </p>
-        <button type="submit">Sign In</button>
-        <input type="hidden" name="next" value="{% url 'ta_dashboard' %}">
-    </form>
-    
-    <hr>
-    <a href="{% url 'ta_dashboard' %}">Return to Dashboard</a>
-</body>
-</html>
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %} {{ form|crispy }}
+
+          <input type="hidden" name="next" value="{% url 'ta_dashboard' %}" />
+
+          <button class="btn btn-primary w-100" type="submit">Sign In</button>
+        </form>
+
+        <a class="d-block mt-3" href="{% url 'ta_dashboard' %}">
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

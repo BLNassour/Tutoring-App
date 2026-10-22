@@ -1,111 +1,229 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>TA Schedule Dashboard</title>
-    <style>
-        .header { display: flex; justify-content: space-between; padding: 10px; background: #f5f5f5; }
-        .main-layout { display: flex; margin-top: 20px; }
-        .sidebar { width: 20%; padding: 10px; border-right: 1px solid #ccc; }
-        .content { width: 80%; padding: 20px; text-align: center; }
-        .tab { display: block; padding: 10px; margin: 5px 0; background: #eee; text-decoration: none; color: black;}
-        .tab.active { background: #007BFF; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        .navigation { margin-top: 30px; }
-        .delete-link { color: red; text-decoration: none; font-weight: bold; margin-left: 5px; }
-        .delete-link:hover { text-decoration: underline; }
-        .delete-ta-btn { display: inline-block; color: white; background-color: red; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 0.8em; margin-top: 5px; font-weight: bold; }
-        .delete-ta-btn:hover { background-color: darkred; }
-        .slot-item { margin-bottom: 8px; display: block; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %} {% block title %}TA Schedule Dashboard{% endblock %}
+{% block content %}
 
-    <div class="header">
-        <div class="auth-btn" style="display: flex; align-items: center; gap: 10px;">
-            {% if user.is_authenticated %}
-                <span>Logged in as: {{ user.username }}</span> | 
-                {% if user.is_superuser or user.ta %}
-                    <a href="{% url 'edit_availability' %}" style="font-weight:bold; color:green; text-decoration: none;">[Edit Availability]</a> |
-                {% endif %}
-                <form method="post" action="{% url 'logout' %}" style="display: inline; margin: 0; padding: 0;">
-                    {% csrf_token %}
-                    <button type="submit" style="background: none; border: none; color: #007BFF; text-decoration: underline; cursor: pointer; font-size: inherit; font-family: inherit; padding: 0;">Sign Out</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">Sign In to Edit Availability</a>
-                <a href="{% url 'signup' %}">Sign Up</a>
-            {% endif %}
+<div class="mb-4">
+  <h1 class="fw-bold">TA Tutoring Schedule</h1>
+  <p class="text-muted">Browse available tutors and their weekly schedules.</p>
+</div>
+
+<div class="row g-4">
+  <!-- Grade filtering -->
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white fw-bold">Grades</div>
+
+      <div class="list-group list-group-flush">
+        <a
+          href="{% url 'ta_dashboard' %}"
+          class="list-group-item list-group-item-action {% if not selected_grade %}active{% endif %}"
+        >
+          All Grades
+        </a>
+
+        {% for grade in grades_list %}
+        <a
+          href="{% url 'ta_dashboard' %}?grade={{ grade }}"
+          class="list-group-item list-group-item-action {% if selected_grade == grade %}active{% endif %}"
+        >
+          Grade {{ grade }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule -->
+  <div class="col-md-9">
+    {% if current_ta %}
+
+    <div class="card shadow-sm">
+      <div class="card-header bg-white p-3">
+        <div
+          class="d-flex justify-content-between align-items-center flex-wrap gap-2"
+        >
+          <div>
+            <h3 class="mb-1">
+              <a
+                href="{% url 'ta_detail' current_ta.pk %}"
+                class="text-decoration-none"
+              >
+                {{ current_ta.name }}
+              </a>
+            </h3>
+            <span class="text-muted">Weekly Availability</span>
+          </div>
+
+          {% if user.is_superuser %}
+          <a
+            href="{% url 'delete_ta' current_ta.pk %}"
+            class="btn btn-outline-danger btn-sm"
+            onclick="
+              return confirm(
+                'Permanently delete this TA profile and all their schedule slots?',
+              );
+            "
+          >
+            Delete TA Profile
+          </a>
+          {% endif %}
         </div>
-        <div>TA Scheduler</div>
+      </div>
+
+      <div class="card-body">
+        <div class="table-responsive">
+          <table
+            class="table table-bordered table-hover text-center align-middle"
+          >
+            <thead class="table-light">
+              <tr>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>
+                  {% for slot in schedule.Monday %}
+                  <div class="mb-2">
+                    <span class="badge text-bg-primary">
+                      {{ slot.time_slot }}
+                    </span>
+                    {% if user.is_superuser or user.ta == current_ta %}
+                    <a
+                      href="{% url 'delete_availability' slot.pk %}"
+                      class="text-danger text-decoration-none ms-1"
+                      onclick="return confirm('Remove this schedule slot?');"
+                    >
+                      ×
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% empty %}
+                  <span class="text-muted">Unavailable</span>
+                  {% endfor %}
+                </td>
+
+                <td>
+                  {% for slot in schedule.Tuesday %}
+                  <div class="mb-2">
+                    <span class="badge text-bg-primary">
+                      {{ slot.time_slot }}
+                    </span>
+                    {% if user.is_superuser or user.ta == current_ta %}
+                    <a
+                      href="{% url 'delete_availability' slot.pk %}"
+                      class="text-danger text-decoration-none ms-1"
+                      onclick="return confirm('Remove this schedule slot?');"
+                    >
+                      ×
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% empty %}
+                  <span class="text-muted">Unavailable</span>
+                  {% endfor %}
+                </td>
+
+                <td>
+                  {% for slot in schedule.Wednesday %}
+                  <div class="mb-2">
+                    <span class="badge text-bg-primary">
+                      {{ slot.time_slot }}
+                    </span>
+                    {% if user.is_superuser or user.ta == current_ta %}
+                    <a
+                      href="{% url 'delete_availability' slot.pk %}"
+                      class="text-danger text-decoration-none ms-1"
+                      onclick="return confirm('Remove this schedule slot?');"
+                    >
+                      ×
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% empty %}
+                  <span class="text-muted">Unavailable</span>
+                  {% endfor %}
+                </td>
+
+                <td>
+                  {% for slot in schedule.Thursday %}
+                  <div class="mb-2">
+                    <span class="badge text-bg-primary">
+                      {{ slot.time_slot }}
+                    </span>
+                    {% if user.is_superuser or user.ta == current_ta %}
+                    <a
+                      href="{% url 'delete_availability' slot.pk %}"
+                      class="text-danger text-decoration-none ms-1"
+                      onclick="return confirm('Remove this schedule slot?');"
+                    >
+                      ×
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% empty %}
+                  <span class="text-muted">Unavailable</span>
+                  {% endfor %}
+                </td>
+
+                <td>
+                  {% for slot in schedule.Friday %}
+                  <div class="mb-2">
+                    <span class="badge text-bg-primary">
+                      {{ slot.time_slot }}
+                    </span>
+                    {% if user.is_superuser or user.ta == current_ta %}
+                    <a
+                      href="{% url 'delete_availability' slot.pk %}"
+                      class="text-danger text-decoration-none ms-1"
+                      onclick="return confirm('Remove this schedule slot?');"
+                    >
+                      ×
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% empty %}
+                  <span class="text-muted">Unavailable</span>
+                  {% endfor %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+          <a
+            href="{% url 'ta_dashboard' %}?ta_index={{ prev_index }}&grade={{ selected_grade }}"
+            class="btn btn-outline-primary"
+          >
+            ← Previous TA
+          </a>
+
+          <a
+            href="{% url 'ta_dashboard' %}?ta_index={{ next_index }}&grade={{ selected_grade }}"
+            class="btn btn-outline-primary"
+          >
+            Next TA →
+          </a>
+        </div>
+      </div>
     </div>
 
-    <div class="main-layout">
-        <div class="sidebar">
-            <h3>Grades</h3>
-            <a href="{% url 'ta_dashboard' %}" class="tab {% if not selected_grade %}active{% endif %}">All Grades</a>
-            {% for grade in grades_list %}
-                <a href="{% url 'ta_dashboard' %}?grade={{ grade }}" class="tab {% if selected_grade == grade %}active{% endif %}">Grade {{ grade }}</a>
-            {% endfor %}
-        </div>
+    {% else %}
 
-        <div class="content">
-            {% if current_ta %}
-                <h2>TA Profile: <a href="{% url 'ta_detail' current_ta.pk %}">{{ current_ta.name }}</a></h2>
-                {% if user.is_superuser %}
-                    <a href="{% url 'delete_ta' current_ta.pk %}" class="delete-ta-btn" onclick="return confirm('Permanently delete this TA profile and all their schedule slots?');">⚠️ Delete TA Profile</a>
-                {% endif %}
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                {% for slot in schedule.Monday %}
-                                    <span class="slot-item">{{ slot.time_slot }}{% if user.is_superuser or user.ta == current_ta %}<a href="{% url 'delete_availability' slot.pk %}" class="delete-link" onclick="return confirm('Remove this schedule slot?');"> [x]</a>{% endif %}</span>
-                                {% empty %}Unavailable{% endfor %}
-                            </td>
-                            <td>
-                                {% for slot in schedule.Tuesday %}
-                                    <span class="slot-item">{{ slot.time_slot }}{% if user.is_superuser or user.ta == current_ta %}<a href="{% url 'delete_availability' slot.pk %}" class="delete-link" onclick="return confirm('Remove this schedule slot?');"> [x]</a>{% endif %}</span>
-                                {% empty %}Unavailable{% endfor %}
-                            </td>
-                            <td>
-                                {% for slot in schedule.Wednesday %}
-                                    <span class="slot-item">{{ slot.time_slot }}{% if user.is_superuser or user.ta == current_ta %}<a href="{% url 'delete_availability' slot.pk %}" class="delete-link" onclick="return confirm('Remove this schedule slot?');"> [x]</a>{% endif %}</span>
-                                {% empty %}Unavailable{% endfor %}
-                            </td>
-                            <td>
-                                {% for slot in schedule.Thursday %}
-                                    <span class="slot-item">{{ slot.time_slot }}{% if user.is_superuser or user.ta == current_ta %}<a href="{% url 'delete_availability' slot.pk %}" class="delete-link" onclick="return confirm('Remove this schedule slot?');"> [x]</a>{% endif %}</span>
-                                {% empty %}Unavailable{% endfor %}
-                            </td>
-                            <td>
-                                {% for slot in schedule.Friday %}
-                                    <span class="slot-item">{{ slot.time_slot }}{% if user.is_superuser or user.ta == current_ta %}<a href="{% url 'delete_availability' slot.pk %}" class="delete-link" onclick="return confirm('Remove this schedule slot?');"> [x]</a>{% endif %}</span>
-                                {% empty %}Unavailable{% endfor %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="navigation">
-                    <a href="{% url 'ta_dashboard' %}?ta_index={{ prev_index }}&grade={{ selected_grade }}">⬅️ Previous TA</a> | 
-                    <a href="{% url 'ta_dashboard' %}?ta_index={{ next_index }}&grade={{ selected_grade }}">Next TA ➡️</a>
-                </div>
-            {% else %}
-                <p>No TAs found for this criteria.</p>
-            {% endif %}
-        </div>
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h4>No Tutors Available</h4>
+        <p class="text-muted mb-0">No TAs found for the selected criteria.</p>
+      </div>
     </div>
 
-</body>
-</html>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
