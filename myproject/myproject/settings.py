@@ -37,7 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tutoring', 
+
+    # Third-party styling
+    'crispy_forms',
+    'crispy_bootstrap5',
+
+    # Local app
+    'tutoring',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +134,6 @@ MAILERS = {
 }
 
 LOGOUT_REDIRECT_URL = 'ta_dashboard'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
